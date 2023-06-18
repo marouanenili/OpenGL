@@ -35,6 +35,7 @@ def init_program():
     GL.glUseProgram(program)
 
 
+
         
 def init_data():
     sommets = np.array(((0, 0, 0), (1, 0, 0), (0, 1, 1)), np.float32)
@@ -57,6 +58,7 @@ def init_data():
     GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
 
 
+
 def run(window):
     # boucle d'affichage
     while not glfw.window_should_close(window):
@@ -65,15 +67,109 @@ def run(window):
 
         #  l'affichage se fera ici
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
+
         # changement de buffer d'affichage pour éviter un effet de scintillement
         glfw.swap_buffers(window)
         # gestion des évènements
         glfw.poll_events()
 
 def key_callback(win, key, scancode, action, mods):
+    prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+    loc = GL.glGetUniformLocation(prog, "translation")
     # sortie du programme si appui sur la touche 'echap'
     if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
         glfw.set_window_should_close(win, glfw.TRUE)
+    if key == glfw.KEY_RIGHT and action == glfw.PRESS:
+        print("right")
+        if loc == -1:
+            print("Pas de variable uniforme : translation")
+        else:
+            # Retrieve the current translation vector
+            current_translation = np.zeros(4, dtype=np.float32)
+            GL.glGetUniformfv(prog, loc, current_translation)
+            # Compute a new translation vector that moves the triangle to the right by 0.1 units
+            new_translation = [current_translation[0] + 0.1, current_translation[1], current_translation[2],
+                               current_translation[3]]
+            # Update the value of the "translation" uniform variable with the new vector
+            GL.glUniform4fv(loc, 1, new_translation)
+    if key == glfw.KEY_LEFT and action == glfw.PRESS:
+        # move left
+        print("left")
+        if loc == -1:
+            print("Pas de variable uniforme : translation")
+        else:
+            # Retrieve the current translation vector
+            current_translation = np.zeros(4, dtype=np.float32)
+            GL.glGetUniformfv(prog, loc, current_translation)
+            # Compute a new translation vector that moves the triangle to the right by 0.1 units
+            new_translation = [current_translation[0] - 0.1, current_translation[1], current_translation[2],
+                               current_translation[3]]
+            # Update the value of the "translation" uniform variable with the new vector
+            GL.glUniform4fv(loc, 1, new_translation)
+    if key == glfw.KEY_UP and action == glfw.PRESS:
+        # move up
+        print("up")
+        if loc == -1:
+            print("Pas de variable uniforme : translation")
+        else:
+            # Retrieve the current translation vector
+            current_translation = np.zeros(4, dtype=np.float32)
+            GL.glGetUniformfv(prog, loc, current_translation)
+            # Compute a new translation vector that moves the triangle to the right by 0.1 units
+            new_translation = [current_translation[0], current_translation[1] + 0.1, current_translation[2],
+                               current_translation[3]]
+            # Update the value of the "translation" uniform variable with the new vector
+            GL.glUniform4fv(loc, 1, new_translation)
+            print("new translation : ", new_translation)
+    if key == glfw.KEY_DOWN and action == glfw.PRESS:
+        # move down
+        print("down")
+        if loc == -1:
+            print("Pas de variable uniforme : translation")
+        else:
+            # Retrieve the current translation vector
+            current_translation = np.zeros(4, dtype=np.float32)
+            GL.glGetUniformfv(prog, loc, current_translation)
+            # Compute a new translation vector that moves the triangle to the right by 0.1 units
+            new_translation = [current_translation[0], current_translation[1] - 0.1, current_translation[2],
+                               current_translation[3]]
+            # Update the value of the "translation" uniform variable with the new vector
+            GL.glUniform4fv(loc, 1, new_translation)
+            print("new translation : ", new_translation)
+    if key == glfw.KEY_SPACE and action == glfw.PRESS:
+        # move z axis up
+        print("space")
+        if loc == -1:
+            print("Pas de variable uniforme : translation")
+        else:
+            # Retrieve the current translation vector
+            current_translation = np.zeros(4, dtype=np.float32)
+            GL.glGetUniformfv(prog, loc, current_translation)
+            # Compute a new translation vector that moves the triangle to the right by 0.1 units
+            new_translation = [current_translation[0], current_translation[1], current_translation[2] + 0.1,
+                               current_translation[3]]
+            print("new translation : ", new_translation)
+
+            # Update the value of the "translation" uniform variable with the new vector
+            GL.glUniform4fv(loc, 1, new_translation)
+    if key == glfw.KEY_LEFT_CONTROL and action == glfw.PRESS:
+        # move z axis down
+        print("left control")
+        if loc == -1:
+            print("Pas de variable uniforme : translation")
+        else:
+            # Retrieve the current translation vector
+            current_translation = np.zeros(4, dtype=np.float32)
+            GL.glGetUniformfv(prog, loc, current_translation)
+            # Compute a new translation vector that moves the triangle to the right by 0.1 units
+            new_translation = [current_translation[0], current_translation[1], current_translation[2] - 0.1,
+                               current_translation[3]]
+            print("new translation : ", new_translation)
+
+            # Update the value of the "translation" uniform variable with the new vector
+            GL.glUniform4fv(loc, 1, new_translation)
+
+
 
 def main():
     window = init_window()

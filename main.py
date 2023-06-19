@@ -4,7 +4,10 @@ import os
 import OpenGL.GL as GL
 import glfw
 import numpy as np
+import pyrr
 
+anglex = 0
+angley = 0
 def init_window():
     # initialisation de la librairie glfw
     glfw.init()
@@ -38,7 +41,7 @@ def init_program():
 
         
 def init_data():
-    sommets = np.array(((0, 0, 0), (1, 0, 0), (0, 1, 1)), np.float32)
+    sommets = np.array(((0, 0, 0), (1, 0, 0), (0, 1, 0)), np.float32)
     # attribution d'une liste d'etat (1 indique la cr ´ eation d'une seule liste) ´
     vao = GL.glGenVertexArrays(1)
     # affectation de la liste d'etat courante ´
@@ -60,7 +63,29 @@ def init_data():
 
 
 def run(window):
+    translation = np.array([0.0, 0.0, -5.0, 0.0], dtype=np.float32)
+    prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+    loc = GL.glGetUniformLocation(prog, "translation")
+    GL.glUniform4fv(loc, 1, translation)
     # boucle d'affichage
+    proj = pyrr.matrix44.create_perspective_projection(50, 1, 0.5, 10)
+    print("projection : ", proj)
+    prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+    loc = GL.glGetUniformLocation(prog, "projection")
+    print(loc)
+    if loc == -1:
+        print("Pas de variable uniforme : projection")
+    GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, proj)
+    roty = pyrr.matrix44.create_from_y_rotation(np.radians(0))
+    rotx = pyrr.matrix44.create_from_x_rotation(np.radians(0))
+    rot = pyrr.matrix44.multiply(rotx, roty)
+    prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+    loc = GL.glGetUniformLocation(prog, "rotation")
+    print(loc)
+    if loc == -1:
+        print("Pas de variable uniforme : projection")
+    GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, rot)
+    anglex, angley = 0, 0
     while not glfw.window_should_close(window):
         # nettoyage de la fenêtre : fond et profondeur
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
@@ -68,13 +93,17 @@ def run(window):
         #  l'affichage se fera ici
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, 3)
 
+
+
         # changement de buffer d'affichage pour éviter un effet de scintillement
         glfw.swap_buffers(window)
         # gestion des évènements
         glfw.poll_events()
 
 def key_callback(win, key, scancode, action, mods):
+    global anglex,angley
     prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+    print(prog)
     loc = GL.glGetUniformLocation(prog, "translation")
     # sortie du programme si appui sur la touche 'echap'
     if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
@@ -136,7 +165,7 @@ def key_callback(win, key, scancode, action, mods):
             # Update the value of the "translation" uniform variable with the new vector
             GL.glUniform4fv(loc, 1, new_translation)
             print("new translation : ", new_translation)
-    if key == glfw.KEY_SPACE and action == glfw.PRESS:
+    if key == glfw.KEY_H and action == glfw.PRESS:
         # move z axis up
         print("space")
         if loc == -1:
@@ -152,7 +181,7 @@ def key_callback(win, key, scancode, action, mods):
 
             # Update the value of the "translation" uniform variable with the new vector
             GL.glUniform4fv(loc, 1, new_translation)
-    if key == glfw.KEY_LEFT_CONTROL and action == glfw.PRESS:
+    if key == glfw.KEY_Y and action == glfw.PRESS:
         # move z axis down
         print("left control")
         if loc == -1:
@@ -168,6 +197,43 @@ def key_callback(win, key, scancode, action, mods):
 
             # Update the value of the "translation" uniform variable with the new vector
             GL.glUniform4fv(loc, 1, new_translation)
+    if key == glfw.KEY_L and action == glfw.PRESS:
+        angley+=0.1
+        roty = pyrr.matrix44.create_from_y_rotation(angley)
+        rotx = pyrr.matrix44.create_from_x_rotation(anglex)
+        rot = pyrr.matrix44.multiply(rotx, roty)
+        prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+        loc = GL.glGetUniformLocation(prog, "rotation")
+        GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, rot)
+        print(anglex, angley)
+    if key == glfw.KEY_J and action == glfw.PRESS:
+        angley-=0.1
+        roty = pyrr.matrix44.create_from_y_rotation(angley)
+        rotx = pyrr.matrix44.create_from_x_rotation(anglex)
+        rot = pyrr.matrix44.multiply(rotx, roty)
+        prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+        loc = GL.glGetUniformLocation(prog, "rotation")
+        GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, rot)
+        print(anglex, angley)
+    if key == glfw.KEY_I and action == glfw.PRESS:
+        anglex+=0.1
+        rotx = pyrr.matrix44.create_from_x_rotation(anglex)
+        roty = pyrr.matrix44.create_from_y_rotation(angley)
+        rot = pyrr.matrix44.multiply(rotx, roty)
+        prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+        loc = GL.glGetUniformLocation(prog, "rotation")
+        GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, rot)
+        print(anglex, angley)
+    if key == glfw.KEY_K and action == glfw.PRESS:
+        anglex-=0.1
+        rotx = pyrr.matrix44.create_from_x_rotation(anglex)
+        roty = pyrr.matrix44.create_from_y_rotation(angley)
+        rot = pyrr.matrix44.multiply(rotx, roty)
+        prog = GL.glGetIntegerv(GL.GL_CURRENT_PROGRAM)
+        loc = GL.glGetUniformLocation(prog, "rotation")
+        GL.glUniformMatrix4fv(loc, 1, GL.GL_FALSE, rot)
+        print(anglex,angley)
+
 
 
 
